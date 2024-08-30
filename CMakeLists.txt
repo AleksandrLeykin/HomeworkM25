@@ -8,7 +8,8 @@ add_executable(${PROJECT_NAME}
                 src/main.cpp 
                 src/mySQLTest.h
                 src/mySQLTest.cpp 
-                src/serverTest.h)
+                src/serverTest.h 
+		src/serverTest.cpp)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 

@@ -26,7 +26,7 @@ bool mySQLTest::mySQLDB()
 	return true;
 }
 
-void mySQLTest::setUser(const std::string& name, const std::string& surname, const std::string& email, const std::string& pas)
+std::string mySQLTest::setUser(const std::string& name, const std::string& surname, const std::string& email, const std::string& pas)
 {
 	connectDB();
 	int i = 0;
@@ -50,9 +50,8 @@ void mySQLTest::setUser(const std::string& name, const std::string& surname, con
 			//просмотр зарегистрированных клиентов
 			//std::cout << currentName << std::endl;
 			if (newName == currentName) {
-				std::cout << "name taken!" << std::endl;
 				mysql_close(&mysql);
-				return;
+				return "name taken!";				
 			}
 		}
 	}
@@ -61,6 +60,40 @@ void mySQLTest::setUser(const std::string& name, const std::string& surname, con
 	//если имя не занято записываем его
 	mysql_real_query(&mysql, record_user.c_str(), record_user.length());
 	mysql_close(&mysql);
+	return "You new user myChat!";
+}
+
+std::string mySQLTest::userLogin(const std::string& name, const std::string& pass)
+{
+	connectDB();
+	int i = 0;
+	
+	//запрос
+	std::string selectUser = "select name, password from user";
+	mysql_real_query(&mysql, selectUser.c_str(), selectUser.length());
+
+	//строка с новым именем
+	std::string newName = name + pass;
+	//проверка имени в таблице через цикл
+	if (res = mysql_store_result(&mysql)) {
+		while (row = mysql_fetch_row(res)) {
+			std::string currentName = "";
+			for (i = 0; i < mysql_num_fields(res); ++i) {
+				currentName += row[i];
+			}
+			//просмотр зарегистрированных клиентов
+			//std::cout << currentName << std::endl;
+			if (newName == currentName) {
+				mysql_close(&mysql);
+				newName = "";				
+				newName = "Hello " + name;
+				return newName;
+			}
+		}
+	}
+	else
+		std::cout << "Error MySql # " << mysql_error(&mysql) << std::endl;
+	return "name or password is incorrect!";
 }
 
 std::string mySQLTest::getUser()

@@ -20,7 +20,10 @@ struct mySQLTest {
 	bool mySQLDB();	
 
 	//добавление пользователя
-	void setUser(const std::string& name, const std::string& surname, const std::string& email, const std::string& pas);	
+	std::string setUser(const std::string& name, const std::string& surname, const std::string& email, const std::string& pas);	
+	
+	//вход пользователя
+	std::string userLogin(const std::string& name, const std::string& pass);
 
 	//просмотр пользователей
 	std::string getUser();	
