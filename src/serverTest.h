@@ -12,25 +12,20 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
+// receiving and transmitting a message прием передача сообщения
 std::string recAndTransMess(SOCKET client_sock, const std::string& str, char buff[BUFSIZ]);
+//name verification сверка имени
+bool nameVerification(SOCKET client_sock, char buff[BUFSIZ]);
 DWORD WINAPI SetToClient(LPVOID  client_socket);
 
 //макрос для печати количества активных пользователей
 #define PRINTUSERS if (nclients) std::cout << nclients << " - User on-line" << std::endl; \
 						else std::cout << "No user on line\n";
 
-// макрос для печати количества активных пользователей
-//#define PRINTUSERS if (nclients) std::cout << nclients << " - User on-line" << std::endl; \
-						else std::cout << "No user on line\n";
-
-
-
 //Key constants
 const char IP_SERV[] = "127.0.0.1";
 const int PORT_NUM = 7777;
 const short BUFF_SIZE = 1024;
-// глобальная переменная - количество активных пользователей
-//int nclients = 0;
 
 class m_server {
 private:
@@ -41,8 +36,7 @@ private:
 	WSAData wsData = {0};	
 
 	//загрузка_сервера
-	void server_loading();
-	
+	void server_loading();	
 	void close_server();	
 
 public:

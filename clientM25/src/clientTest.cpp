@@ -57,7 +57,6 @@ void myClient::client_loading()
 	// The size of sending / receiving packet in bytes // –азмер отправл€емого/принимаемого пакета в байтах
 	short packet_size = 0;
 
-
 	while (true) {
 		//‘ункци€ fgets считывает строку из входного аргумента stdin stream и сохран€ет ее в clientBuff.data()
 		//fgets(clientBuff.data(), clientBuff.size(), stdin);
@@ -71,6 +70,7 @@ void myClient::client_loading()
 			WSACleanup();
 			return;
 		}
+	
 		//sending message to server отправка сообщени€ на сервер
 		packet_size = send(clientSock, clientBuff.data(), clientBuff.size(), 0);
 		if (packet_size == SOCKET_ERROR) {
@@ -79,6 +79,10 @@ void myClient::client_loading()
 			WSACleanup();
 			return;
 		}
+		
+		//очистка вектора serverBuff
+		auto it = serverBuff.cbegin();
+		serverBuff.insert(it, serverBuff.size(), '\0');
 		//receiving message from server прием сообщени€ с сервера
 		packet_size = recv(clientSock, serverBuff.data(), serverBuff.size(), 0);
 		if (packet_size == SOCKET_ERROR) {
@@ -103,7 +107,10 @@ void myClient::client_loading()
 				WSACleanup();
 				return;
 			}
-			//receiving message from server прием сообщени€ с сервера
+			//очистка вектора serverBuff
+			auto it = serverBuff.cbegin();
+			serverBuff.insert(it, serverBuff.size(), '\0');
+			//receiving message from server прием сообщени€ с сервера			
 			packet_size = recv(clientSock, serverBuff.data(), serverBuff.size(), 0);
 			if (packet_size == SOCKET_ERROR) {
 				std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
@@ -113,7 +120,7 @@ void myClient::client_loading()
 			}
 			else
 				std::cout << "Registered users:\n" << serverBuff.data() << std::endl;
-			userMessage();
+			userMessage(clientSock);
 		}
 
 		m_str = "";
@@ -129,14 +136,40 @@ void myClient::client_loading()
 	}
 }
 
-void myClient::userMessage()
-{
-	std::cout << "Who should I send the message to?  ому отправить сообщение?" << std::endl;
+void myClient::userMessage(SOCKET client_sock) {	
+	setMyString("n");
+	//запрос имени name request
+	std::string result = receptionTransmissionMes(client_sock, m_str);
+	std::cout << result << std::endl;
+	//отправка имени sending name
 	std::string username = getLineOfText();
-	std::cout << "Type a message! for - Ќаберите сообщение! дл€ -  " << username << std::endl;
-	std::string userMessage = getLineOfText();
+	result = receptionTransmissionMes(client_sock, username);
+	std::cout << result << std::endl;
 
-	std::cout << "message - " << userMessage << std::endl;
+	//набор сообщени€ typing a message
+	std::string userMessage = getLineOfText();
+	result = receptionTransmissionMes(client_sock, userMessage);
+	std::cout << result << std::endl;
+}
+
+std::string myClient::receptionTransmissionMes(SOCKET client_sock, const std::string& name)
+{
+	std::vector<char> serverBuff(BUFF_SIZE);
+
+	//sending message to server отправка сообщени€ на сервер
+	if (send(client_sock, name.c_str(), name.size(), 0) == SOCKET_ERROR) {		
+		closesocket(client_sock);
+		WSACleanup();
+		return "Can't send message to Server. Error # ";
+	}
+	//receiving message from server прием сообщени€ с сервера	
+	if (recv(client_sock, serverBuff.data(), serverBuff.size(), 0) == SOCKET_ERROR) {		
+		closesocket(client_sock);
+		WSACleanup();
+		return "Can't receive message from Server. Error # ";
+	}
+	std::string str(serverBuff.begin(), serverBuff.end());
+	return str;
 }
 
 #endif

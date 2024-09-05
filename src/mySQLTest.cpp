@@ -86,7 +86,7 @@ std::string mySQLTest::userLogin(const std::string& name, const std::string& pas
 			if (newName == currentName) {
 				mysql_close(&mysql);
 				newName = "";				
-				newName = "Hello " + name;
+				newName = "Hello " + name + "   ";
 				return newName;
 			}
 		}

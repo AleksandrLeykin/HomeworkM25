@@ -97,7 +97,8 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 	// цикл эхо-сервера: прием строки от клиента и возвращение ее клиенту
 	while ((bytes_recv = recv(client_sock, &buff[0], sizeof(buff), 0)) && bytes_recv != SOCKET_ERROR) {
 		std::string result = "";
-		switch (buff[0])
+		bool completion = true;
+		switch (*buff)
 		{
 		case 'u':
 		{
@@ -107,6 +108,23 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			ZeroMemory(&buff, sizeof(buff));
 		}
 		break;
+		case 'n':
+			//сверка имени
+			do
+			{
+				if (nameVerification(client_sock, buff)) {
+					recAndTransMess(client_sock, "Enter message!", buff);
+					result = "prodolzim!!!";
+					send(client_sock, result.c_str(), result.length(), 0);
+					completion = false;
+				}
+				else {
+					result = "There is no such user! ";
+					send(client_sock, result.c_str(), result.length(), 0);					
+				}
+			} while (completion);
+			
+			break;
 		case 'r':
 		{
 			//std::string str = "Enter you name:";
@@ -168,9 +186,8 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			break; 
 		default:
 			result = "Invalid character entered!";
-			send(client_sock, result.c_str(), result.length(), 0);		
-			
-			memset(buff, BUFSIZ, 0);
+			send(client_sock, result.c_str(), result.length(), 0);					
+			//memset(buff, 0, BUFSIZ);
 			break;
 		}
 	}
@@ -194,4 +211,35 @@ std::string recAndTransMess(SOCKET client_sock,const std::string& str, char buff
 		
 	recv(client_sock, &buff[0], sizeof(buff), 0);	
 	return buff;
+}
+
+bool nameVerification(SOCKET client_sock, char buff[BUFSIZ])
+{
+	std::string nameRequest = "Who to send message to?"; // Кому отправить сообщение?			
+	//запрос имени name request
+	std::string user_name = recAndTransMess(client_sock, nameRequest, buff);
+	ZeroMemory(&buff, sizeof(buff));
+	mySQLTest mysql;
+	std::string result = mysql.getUser();
+	//запись имен из таблицы
+	std::vector<std::string> userName;
+	//имя из списка name from the list
+	std::string name = "";
+	for (int i = 0; i < result.size(); i++) {
+		name += result[i];
+		if (result[i] == ' ' || result[i] == '\0') {
+			userName.push_back(name);
+			name = "";
+		}
+	}
+	//сверка имени
+	for (int i = 0; i < userName.size(); i++) {
+		if (userName[i] == user_name + " ") {			
+			return true;
+		}
+		if (i == (userName.size() - 1) && userName[i] != (user_name + " ")) {
+			return false;			
+		}
+	}
+	return false;
 }

@@ -46,7 +46,7 @@ void client_loading() {
 
 #elif defined(_WIN64)
 
-#include <WinSock2.h>
+#include <WinSock2.h>;
 #include <WS2tcpip.h>
 #include <stdio.h>
 //#include <inaddr.h>
@@ -66,7 +66,9 @@ class myClient {
 	void client_loading();
 private:
 	std::string m_str = "";
-	void userMessage();
+	void userMessage(SOCKET client_sock);
+
+	std::string receptionTransmissionMes(SOCKET client_sock, const std::string& name);
 
 	//ввод строки (line input)
 	std::string getLineOfText() {
