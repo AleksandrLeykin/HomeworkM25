@@ -21,10 +21,10 @@ private:
 		std::cin.ignore(32767, '\n');
 	}
 	//ввод строки (line input)
-	std::string getLineOfText()
-	{
+	//ввод строки (line input)
+	std::string getLineOfText() {
 		std::string str = "";
-		std::cin >> str;
+		getline(std::cin, str);
 		return str;
 	}
 	//ввод числа (Enter a number)
@@ -38,6 +38,15 @@ private:
 			}
 			else
 				return num;
+		}
+	}
+
+	char getChar() {
+		while (true) {
+			char ch = '\0'; 
+			std::cin >> ch;	
+			cinClear();
+			return ch;
 		}
 	}
 };

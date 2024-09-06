@@ -127,31 +127,35 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			break;
 		case 'r':
 		{
-			//std::string str = "Enter you name:";
-			/*send(client_sock, str.c_str(), str.length(), 0);
-			ZeroMemory(&buff, sizeof(buff));
-			recv(client_sock, &buff[0], sizeof(buff), 0);
-			std::string name = buff;*/
-			/*str = "Enter you surname:";
+			std::string str = "Enter you name:";
 			send(client_sock, str.c_str(), str.length(), 0);
 			ZeroMemory(&buff, sizeof(buff));
 			recv(client_sock, &buff[0], sizeof(buff), 0);
-			std::string surname = buff;*/
-			/*	str = "Enter you email: ";
+			std::string name = buff;
+			str = "Enter you surname:";
 			send(client_sock, str.c_str(), str.length(), 0);
 			ZeroMemory(&buff, sizeof(buff));
 			recv(client_sock, &buff[0], sizeof(buff), 0);
-			std::string email = buff;*/
-			/*	str = "Enter you pass: ";
+			std::string surname = buff;
+				str = "Enter you email: ";
 			send(client_sock, str.c_str(), str.length(), 0);
 			ZeroMemory(&buff, sizeof(buff));
 			recv(client_sock, &buff[0], sizeof(buff), 0);
-			std::string pass = buff;*/
+			std::string email = buff;
+				str = "Enter you pass: ";
+			send(client_sock, str.c_str(), str.length(), 0);
+			ZeroMemory(&buff, sizeof(buff));
+			recv(client_sock, &buff[0], sizeof(buff), 0);
+			std::string pass = buff;
 
-			std::string name = recAndTransMess(client_sock,    "Enter you name:", buff);
+			/*std::string name = recAndTransMess(client_sock,    "Enter you name:", buff);
+			
 			std::string surname = recAndTransMess(client_sock, "Enter you surname:", buff);
+		
 			std::string email = recAndTransMess(client_sock,   "Enter you email:  ", buff);
+			
 			std::string pass = recAndTransMess(client_sock,    "Enter you pass:   ", buff);
+			*/
 
 			mySQLTest mysql;
 			result = mysql.setUser(name, surname, email, pass);
@@ -206,7 +210,8 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 }
 
 std::string recAndTransMess(SOCKET client_sock,const std::string& str, char buff[BUFSIZ])
-{		
+{	
+	memset(buff, 0, BUFSIZ);
 	send(client_sock, str.c_str(), str.length(), 0);
 		
 	recv(client_sock, &buff[0], sizeof(buff), 0);	

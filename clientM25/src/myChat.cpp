@@ -30,26 +30,27 @@ void MyChat::interChat()
 {
 	while (true) {
 		std::cout << "Для входа нажмите - 1, для регистрации - 2, для выхода - 3 или exit:\n"
-			<< "To enter, press - 1, to register - 2, to exit - 3 or exit: ";
-		int number = getint();
+			<< "To enter, press - v, to register - r, to exit - 3 or exit: ";
+		//int number = getint();
+		char symbol = getChar();
 				
-		switch (number)
+		switch (symbol)
 		{
-		case 1:
+		case 'v':
 		{
 			myClient client;
 			client.setMyString("v");			
 			client.client_loading();			
 		}
 			break;
-		case 2:
+		case 'r':
 		{
 			myClient client;
 			client.setMyString("r");
 			client.client_loading();
 		}
  			break;
-		case 3:
+		case '3':
 		{
 			myClient client;
 			client.setMyString("exit");
