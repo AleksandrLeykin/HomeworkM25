@@ -16,6 +16,8 @@
 std::string recAndTransMess(SOCKET client_sock, const std::string& str, char buff[BUFSIZ]);
 //name verification сверка имени
 bool nameVerification(SOCKET client_sock, char buff[BUFSIZ]);
+//запись сooбщения в таблицу write message to table
+std::string writingMessage(const std::string& name1, const std::string& name2, const std::string& strMes);
 DWORD WINAPI SetToClient(LPVOID  client_socket);
 
 //макрос для печати количества активных пользователей

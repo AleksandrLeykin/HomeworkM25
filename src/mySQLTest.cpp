@@ -12,6 +12,7 @@ bool mySQLTest::mySQLDB()
 		"password VARCHAR(32) NOT NULL)";
 	mysql_real_query(&mysql, createTable.c_str(), createTable.length());
 
+	//user1_id - получатель, user2_id - отправитель
 	std::string createTableMessage = "CREATE TABLE IF NOT EXISTS messages("
 		"id SERIAL PRIMARY KEY AUTO_INCREMENT, "
 		"user1_id integer NOT NULL REFERENCES user(id), "
@@ -60,7 +61,7 @@ std::string mySQLTest::setUser(const std::string& name, const std::string& surna
 	//если имя не занято записываем его
 	mysql_real_query(&mysql, record_user.c_str(), record_user.length());
 	mysql_close(&mysql);
-	return "You new user myChat!";
+	return "You new user myChat! If you want to send a message, enter - 'y', to exit - 'exit'";
 }
 
 std::string mySQLTest::userLogin(const std::string& name, const std::string& pass)
@@ -86,7 +87,7 @@ std::string mySQLTest::userLogin(const std::string& name, const std::string& pas
 			if (newName == currentName) {
 				mysql_close(&mysql);
 				newName = "";				
-				newName = "Hello " + name + "   ";
+				newName = "Hello " + name;
 				return newName;
 			}
 		}
@@ -112,6 +113,21 @@ std::string mySQLTest::getUser()
 		}
 	}
 	return result;
+}
+
+bool mySQLTest::writingMessage(const std::string& name1, const std::string& name2, const std::string& strMes)
+{
+	//подготовка запроса //preparing request
+	std::string selectMessage = "INSERT INTO messages(id, user1_id, user2_id, data_create, messages)"
+		" VALUES(default, "
+		"(select id from user where name = '" + name1 + "'), "
+		"(select id from user where name = '" + name2 + "'), "
+		"(select sysdate()), "
+		"'" + strMes + "')";
+	if (mysql_real_query(&mysql, selectMessage.c_str(), selectMessage.length()) == 0) {
+		return true;
+	}
+	return false;
 }
 
 void mySQLTest::connectDB()

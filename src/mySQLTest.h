@@ -28,6 +28,9 @@ struct mySQLTest {
 	//просмотр пользователей
 	std::string getUser();	
 
+	//запись сообщения
+	bool writingMessage(const std::string& name1, const std::string& name2, const std::string& strMes);
+
 private:
 	//дескриптор
 	MYSQL mysql;

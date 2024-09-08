@@ -3,6 +3,8 @@
 
 //переменная - количество активных пользователей
 int nclients = 0;
+//имя получателя сообщения message recipient name
+std::string messageRecipientName = "";
 
 m_server::m_server() {
 	server_loading();
@@ -90,6 +92,9 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 	SOCKET client_sock;
 	client_sock = ((SOCKET*)client_socket)[0];
 
+	//имя вошедшего в чат пользователя name of the user who entered the chat
+	std::string clientName = "";
+	
 	char buff[BUFSIZ]{}; //char buff[20 * 1024];
 	
 	int bytes_recv = 0;
@@ -113,8 +118,11 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			do
 			{
 				if (nameVerification(client_sock, buff)) {
-					recAndTransMess(client_sock, "Enter message!", buff);
-					result = "prodolzim!!!";
+					std::string strMessage = recAndTransMess(client_sock, "Enter message!", buff);
+					//запись сooбщения в таблицу
+					std::string msg = writingMessage(messageRecipientName, clientName, strMessage);
+
+					result = msg + "\nprodolzim?? Enter - 'n' dly message, enter - 'exit' dly vixoda";
 					send(client_sock, result.c_str(), result.length(), 0);
 					completion = false;
 				}
@@ -131,7 +139,7 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			send(client_sock, str.c_str(), str.length(), 0);
 			ZeroMemory(&buff, sizeof(buff));
 			recv(client_sock, &buff[0], sizeof(buff), 0);
-			std::string name = buff;
+			clientName = buff;
 			str = "Enter you surname:";
 			send(client_sock, str.c_str(), str.length(), 0);
 			ZeroMemory(&buff, sizeof(buff));
@@ -156,10 +164,17 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			
 			std::string pass = recAndTransMess(client_sock,    "Enter you pass:   ", buff);
 			*/
-
 			mySQLTest mysql;
-			result = mysql.setUser(name, surname, email, pass);
-			send(client_sock, result.c_str(), result.length(), 0);	
+			result = mysql.setUser(clientName, surname, email, pass);
+			send(client_sock, result.c_str(), result.length(), 0);		
+
+			ZeroMemory(&buff, sizeof(buff));
+			recv(client_sock, &buff[0], sizeof(buff), 0);
+			result = buff;
+			if (result == "y") {
+				result = mysql.userLogin(clientName, pass);
+				send(client_sock, result.c_str(), result.length(), 0);
+			}
 		}
 		break;
 		case 'v':
@@ -176,12 +191,12 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			//recv(client_sock, &buff[0], sizeof(buff), 0);
 			//std::string pass = buff;
 
-			std::string name = recAndTransMess(client_sock, "Enter you name:", buff);
+			clientName = recAndTransMess(client_sock, "Enter you name:", buff);
 			//ZeroMemory(&buff, sizeof(buff));
 			std::string pass = recAndTransMess(client_sock, "Enter you pass:", buff);
 			
 			mySQLTest mysql;
-			result = mysql.userLogin(name, pass);			
+			result = mysql.userLogin(clientName, pass);
 			send(client_sock, result.c_str(), result.length(), 0);			
 		}
 		break;
@@ -200,9 +215,7 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 	nclients--; // уменьшаем счетчик активных клиентов
 	printf("-disconnect\n"); 
 	PRINTUSERS
-
-		// закрываем сокет
-		//closesocket(client_socket);
+	// закрываем сокет closesocket(client_socket);
 	if (client_sock != INVALID_SOCKET) {
 		closesocket(client_sock);
 	}
@@ -211,7 +224,7 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 
 std::string recAndTransMess(SOCKET client_sock,const std::string& str, char buff[BUFSIZ])
 {	
-	memset(buff, 0, BUFSIZ);
+	memset(buff, '\0', BUFSIZ);
 	send(client_sock, str.c_str(), str.length(), 0);
 		
 	recv(client_sock, &buff[0], sizeof(buff), 0);	
@@ -222,7 +235,7 @@ bool nameVerification(SOCKET client_sock, char buff[BUFSIZ])
 {
 	std::string nameRequest = "Who to send message to?"; // Кому отправить сообщение?			
 	//запрос имени name request
-	std::string user_name = recAndTransMess(client_sock, nameRequest, buff);
+	messageRecipientName = recAndTransMess(client_sock, nameRequest, buff);
 	ZeroMemory(&buff, sizeof(buff));
 	mySQLTest mysql;
 	std::string result = mysql.getUser();
@@ -239,12 +252,22 @@ bool nameVerification(SOCKET client_sock, char buff[BUFSIZ])
 	}
 	//сверка имени
 	for (int i = 0; i < userName.size(); i++) {
-		if (userName[i] == user_name + " ") {			
+		if (userName[i] == messageRecipientName + " ") {
 			return true;
 		}
-		if (i == (userName.size() - 1) && userName[i] != (user_name + " ")) {
+		if (i == (userName.size() - 1) && userName[i] != (messageRecipientName + " ")) {
 			return false;			
 		}
 	}
 	return false;
+}
+//запись сooбщения в таблицу
+std::string writingMessage(const std::string& name1, const std::string&  name2, const std::string& strMes)
+{
+	mySQLTest mysql;
+	if (mysql.writingMessage(name1, name2, strMes)) {
+		return "Message sent!";
+	}
+	else
+	return "Message not sent!";
 }

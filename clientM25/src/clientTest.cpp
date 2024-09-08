@@ -16,8 +16,7 @@ void myClient::client_loading()
 		std::cout << WSAGetLastError();
 		return;
 	}
-	else
-		std::cout << "WinSock initialization is OK" << std::endl;
+	//else 		std::cout << "WinSock initialization is OK" << std::endl;
 
 	// Socket initialization
 	SOCKET clientSock = socket(AF_INET, SOCK_STREAM, 0);
@@ -26,8 +25,7 @@ void myClient::client_loading()
 		closesocket(clientSock);
 		WSACleanup();
 	}
-	else
-		std::cout << "Client socket initialization is OK" << std::endl;
+	//else 		std::cout << "Client socket initialization is OK" << std::endl;
 
 	// Establishing a connection to Server //Установление соединения с сервером
 	sockaddr_in serverAddress;
@@ -48,9 +46,9 @@ void myClient::client_loading()
 		WSACleanup();
 		return;
 	}
-	else
+	/*else
 		std::cout << "Connection established SUCCESSFULLY. Ready to send a message to Server"
-		<< "Соединение установлено УСПЕШНО.\nГотово к отправке сообщения на сервер" << std::endl;
+		<< "Соединение установлено УСПЕШНО.\nГотово к отправке сообщения на сервер" << std::endl;*/
 
 	// Buffers for sending and receiving data // Буферы для отправки и получения данных
 	std::vector<char> serverBuff(BUFF_SIZE), clientBuff(BUFF_SIZE);

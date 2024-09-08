@@ -29,7 +29,7 @@ std::string MyChat::userRegistration()
 void MyChat::interChat()
 {
 	while (true) {
-		std::cout << "Для входа нажмите - 1, для регистрации - 2, для выхода - 3 или exit:\n"
+		std::cout << "Для входа нажмите - v, для регистрации - r, для выхода - 3 или exit:\n"
 			<< "To enter, press - v, to register - r, to exit - 3 or exit: ";
 		//int number = getint();
 		char symbol = getChar();
