@@ -76,8 +76,7 @@ void myClient::client_loading()
 			closesocket(clientSock);
 			WSACleanup();
 			return;
-		}
-		
+		}		
 		//очистка вектора serverBuff
 		auto it = serverBuff.cbegin();
 		serverBuff.insert(it, serverBuff.size(), '\0');
@@ -91,33 +90,44 @@ void myClient::client_loading()
 		}
 		else
 			std::cout << "Server message: " << serverBuff.data() << std::endl;
-		//пробую перейти на сообщения
+
+		//переход на сообщения
 		if (serverBuff[0] == 'H')
 		{
-			//std::cout << "testProba!!!!" << std::endl;
+			//здесь пробуем принять посланные для пользователя сообщения
+			setMyString("m");
+			std::string result = receptionTransmissionMes(clientSock, m_str);
+			std::cout << result << std::endl;
+
+			//переход на сообщения
 			setMyString("u");
-			clientBuff = { cbegin(m_str), cend(m_str) };
-			//sending message to server отправка сообщения на сервер
-			packet_size = send(clientSock, clientBuff.data(), clientBuff.size(), 0);
-			if (packet_size == SOCKET_ERROR) {
-				std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-				closesocket(clientSock);
-				WSACleanup();
-				return;
-			}
-			//очистка вектора serverBuff
-			auto it = serverBuff.cbegin();
-			serverBuff.insert(it, serverBuff.size(), '\0');
-			//receiving message from server прием сообщения с сервера			
-			packet_size = recv(clientSock, serverBuff.data(), serverBuff.size(), 0);
-			if (packet_size == SOCKET_ERROR) {
-				std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-				closesocket(clientSock);
-				WSACleanup();
-				return;
-			}
-			else
-				std::cout << "Registered users:\n" << serverBuff.data() << std::endl;
+			//clientBuff = { cbegin(m_str), cend(m_str) };
+
+			result = receptionTransmissionMes(clientSock, m_str);
+			std::cout << "Registered users:\n" << result << std::endl;
+
+			////sending message to server отправка сообщения на сервер
+			//packet_size = send(clientSock, clientBuff.data(), clientBuff.size(), 0);
+			//if (packet_size == SOCKET_ERROR) {
+			//	std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
+			//	closesocket(clientSock);
+			//	WSACleanup();
+			//	return;
+			//}
+			////очистка вектора serverBuff
+			//auto it = serverBuff.cbegin();
+			//serverBuff.insert(it, serverBuff.size(), '\0');
+			////receiving message from server прием сообщения с сервера			
+			//packet_size = recv(clientSock, serverBuff.data(), serverBuff.size(), 0);
+			//if (packet_size == SOCKET_ERROR) {
+			//	std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
+			//	closesocket(clientSock);
+			//	WSACleanup();
+			//	return;
+			//}
+			//else
+			//	std::cout << "Registered users:\n" << serverBuff.data() << std::endl;
+
 			userMessage(clientSock);
 		}
 
@@ -155,7 +165,7 @@ std::string myClient::receptionTransmissionMes(SOCKET client_sock, const std::st
 	std::vector<char> serverBuff(BUFF_SIZE);
 
 	//sending message to server отправка сообщения на сервер
-	if (send(client_sock, name.c_str(), name.size(), 0) == SOCKET_ERROR) {		
+	if (send(client_sock, name.c_str(), name.length(), 0) == SOCKET_ERROR) {
 		closesocket(client_sock);
 		WSACleanup();
 		return "Can't send message to Server. Error # ";

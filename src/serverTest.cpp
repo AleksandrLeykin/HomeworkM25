@@ -104,34 +104,9 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 		std::string result = "";
 		bool completion = true;
 		switch (*buff)
-		{
-		case 'u':
-		{
-			mySQLTest mysql;
-			result = mysql.getUser();
-			send(client_sock, result.c_str(), result.size(), 0);
-			ZeroMemory(&buff, sizeof(buff));
-		}
-		break;
-		case 'n':
-			//сверка имени
-			do
-			{
-				if (nameVerification(client_sock, buff)) {
-					std::string strMessage = recAndTransMess(client_sock, "Enter message!", buff);
-					//запись сooбщения в таблицу
-					std::string msg = writingMessage(messageRecipientName, clientName, strMessage);
-
-					result = msg + "\nprodolzim?? Enter - 'n' dly message, enter - 'exit' dly vixoda";
-					send(client_sock, result.c_str(), result.length(), 0);
-					completion = false;
-				}
-				else {
-					result = "There is no such user! ";
-					send(client_sock, result.c_str(), result.length(), 0);					
-				}
-			} while (completion);
-			
+		{	
+		case 'e' + 'x' + 'i' + 't':
+			closesocket(client_sock);
 			break;
 		case 'r':
 		{
@@ -155,15 +130,7 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			ZeroMemory(&buff, sizeof(buff));
 			recv(client_sock, &buff[0], sizeof(buff), 0);
 			std::string pass = buff;
-
-			/*std::string name = recAndTransMess(client_sock,    "Enter you name:", buff);
-			
-			std::string surname = recAndTransMess(client_sock, "Enter you surname:", buff);
-		
-			std::string email = recAndTransMess(client_sock,   "Enter you email:  ", buff);
-			
-			std::string pass = recAndTransMess(client_sock,    "Enter you pass:   ", buff);
-			*/
+						
 			mySQLTest mysql;
 			result = mysql.setUser(clientName, surname, email, pass);
 			send(client_sock, result.c_str(), result.length(), 0);		
@@ -190,19 +157,54 @@ DWORD __stdcall SetToClient(LPVOID client_socket) {
 			////memset(buff, 0, BUFSIZ);
 			//recv(client_sock, &buff[0], sizeof(buff), 0);
 			//std::string pass = buff;
-
 			clientName = recAndTransMess(client_sock, "Enter you name:", buff);
 			//ZeroMemory(&buff, sizeof(buff));
 			std::string pass = recAndTransMess(client_sock, "Enter you pass:", buff);
 			
 			mySQLTest mysql;
-			result = mysql.userLogin(clientName, pass);
+			result = mysql.userLogin(clientName, pass);			
 			send(client_sock, result.c_str(), result.length(), 0);			
 		}
 		break;
-		case 'e' + 'x' + 'i' + 't':
-			closesocket(client_sock);
-			break; 
+		case 'm':
+			result = receivedMessages(clientName);
+			if (result.empty()) {
+				result = "you no messages!";
+			}
+			else
+				result = "messages to you:\n" + result;
+			
+			send(client_sock, result.c_str(), result.size(), 0);
+			
+			break;
+		case 'u':
+		{
+			mySQLTest mysql;
+			result = mysql.getUser();			
+			send(client_sock, result.c_str(), result.size(), 0);
+			//ZeroMemory(&buff, sizeof(buff));
+		}
+		break;
+		case 'n':
+			//сверка имени
+			//while (bytes_recv != SOCKET_ERROR ||completion)
+			//{
+				if (nameVerification(client_sock, buff)) {
+					std::string strMessage = recAndTransMess(client_sock, "Enter message!", buff);
+					//запись сooбщения в таблицу
+					std::string msg = writingMessage(messageRecipientName, clientName, strMessage);
+
+					result = msg + "\nprodolzim?? Enter - 'n' dly message, enter - 'exit' dly vixoda";
+					completion = false;
+					send(client_sock, result.c_str(), result.length(), 0);
+				}
+				else {
+					result = "There is no such user! ";
+					send(client_sock, result.c_str(), result.length(), 0);
+				}
+			//}
+
+			break;		 
 		default:
 			result = "Invalid character entered!";
 			send(client_sock, result.c_str(), result.length(), 0);					
@@ -261,13 +263,23 @@ bool nameVerification(SOCKET client_sock, char buff[BUFSIZ])
 	}
 	return false;
 }
+
+//display received messages показ принятых сообщений
+std::string receivedMessages(const std::string& name)
+{
+	mySQLTest mysql;
+	std::string result = "";
+	result = mysql.viewMessages(name);	
+	return result;
+}
+
 //запись сooбщения в таблицу
 std::string writingMessage(const std::string& name1, const std::string&  name2, const std::string& strMes)
 {
 	mySQLTest mysql;
-	if (mysql.writingMessage(name1, name2, strMes)) {
+	if (mysql.writingMessage(name1, name2, strMes)) {		
 		return "Message sent!";
 	}
-	else
-	return "Message not sent!";
+	else 
+		return "Message not sent!";	
 }

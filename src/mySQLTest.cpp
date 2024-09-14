@@ -130,6 +130,28 @@ bool mySQLTest::writingMessage(const std::string& name1, const std::string& name
 	return false;
 }
 
+std::string mySQLTest::viewMessages(const std::string name)
+{
+	int i = 0;
+	std::string result = "";
+	//запрос
+	std::string selecMessages = "select u.name, m.data_create, m.messages "
+								"from user as u join messages as m "
+								"on u.id = m.user2_id and m.user1_id = "
+								"(select id from user where name = '" + name + "')";
+
+	mysql_real_query(&mysql, selecMessages.c_str(), selecMessages.length());
+	if (res = mysql_store_result(&mysql)) {
+		while (row = mysql_fetch_row(res)) {
+			for (i = 0; i < mysql_num_fields(res); i++) {
+				result = result + row[i] + " ";
+			}
+			result += "\n";
+		}
+	}
+	return result;
+}
+
 void mySQLTest::connectDB()
 {
 	// Получаем дескриптор соединения
